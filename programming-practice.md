@@ -286,3 +286,67 @@ public:
     }
 };
 ```
+
+## 堆/优先队列
+
+### 215. 数组中的第K个最大元素
+
+题目
+
+[215](https://leetcode.cn/problems/kth-largest-element-in-an-array/description/?envType=study-plan-v2&envId=leetcode-75)
+
+```
+给定整数数组 nums 和整数 k，请返回数组中第 k 个最大的元素。
+
+请注意，你需要找的是数组排序后的第 k 个最大的元素，而不是第 k 个不同的元素。
+
+你必须设计并实现时间复杂度为 O(n) 的算法解决此问题。
+
+ 
+
+示例 1:
+
+输入: [3,2,1,5,6,4], k = 2
+输出: 5
+示例 2:
+
+输入: [3,2,3,1,2,4,5,5,6], k = 4
+输出: 4
+
+```
+
+解体思路：
+>        1. 建立大小为k的小顶堆
+>        2. 往堆里继续添加数字， 
+>         - a. 如果该数字小于堆顶， 不要管它
+>         - b. 如果该数字大于堆顶， 把它压入堆, 把堆顶元素弹出
+>         - c. 则堆里的数字中， 堆顶以下的元素都比堆顶大， 堆顶就是第k个最大的元素
+
+
+代码：
+
+```
+class Solution {
+public:
+    int findKthLargest(vector<int>& nums, int k) {
+        //建立大小为k的小顶堆
+        //往堆里继续添加数字， 
+        // - 1. 如果该数字小于堆顶， 不要管它
+        // - 2. 如果该数字大于堆顶， 把它压入堆, 把堆顶元素弹出
+        // - 3. 则堆里的数字中， 堆顶一下的元素都比堆顶大， 堆顶就是第k个最大的元素
+        std::priority_queue<int, vector<int>, std::greater<int> > smallQueue;
+        for (int i = 0; i < k; ++i) {
+            smallQueue.push(nums[i]);
+        }
+        for (int j = k; j < nums.size(); ++j) {
+            if (nums[j] > smallQueue.top()) {
+                smallQueue.pop(); 
+                smallQueue.push(nums[j]);
+            }
+        }
+
+        return smallQueue.top();
+        
+    }
+};
+```
