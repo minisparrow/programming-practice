@@ -18,7 +18,9 @@
 说明：你不能倾斜容器。
 
 ```
-![Screenshot 2024-05-18 at 19.35.41](media/17160319560093/Screenshot%202024-05-18%20at%2019.35.41.png)
+![Screenshot 2024-05-22 at 08.09.07](media/17160319560093/Screenshot%202024-05-22%20at%2008.09.07.png)
+
+
 
 解题思路：
 
@@ -348,5 +350,95 @@ public:
         return smallQueue.top();
         
     }
+};
+```
+
+
+### 2542. 最大子序列的分数
+
+题目
+[2542](https://leetcode.cn/problems/maximum-subsequence-score/description/?envType=study-plan-v2&envId=leetcode-75)
+
+
+```
+给你两个下标从 0 开始的整数数组 nums1 和 nums2 ，两者长度都是 n ，再给你一个正整数 k 。你必须从 nums1 中选一个长度为 k 的 子序列 对应的下标。
+
+对于选择的下标 i0 ，i1 ，...， ik - 1 ，你的 分数 定义如下：
+
+nums1 中下标对应元素求和，乘以 nums2 中下标对应元素的 最小值 。
+用公式表示： (nums1[i0] + nums1[i1] +...+ nums1[ik - 1]) * min(nums2[i0] , nums2[i1], ... ,nums2[ik - 1]) 。
+请你返回 最大 可能的分数。
+
+一个数组的 子序列 下标是集合 {0, 1, ..., n-1} 中删除若干元素得到的剩余集合，也可以不删除任何元素。
+
+ 
+
+示例 1：
+
+输入：nums1 = [1,3,3,2], nums2 = [2,1,3,4], k = 3
+输出：12
+解释：
+四个可能的子序列分数为：
+- 选择下标 0 ，1 和 2 ，得到分数 (1+3+3) * min(2,1,3) = 7 。
+- 选择下标 0 ，1 和 3 ，得到分数 (1+3+2) * min(2,1,4) = 6 。
+- 选择下标 0 ，2 和 3 ，得到分数 (1+3+2) * min(2,3,4) = 12 。
+- 选择下标 1 ，2 和 3 ，得到分数 (3+3+2) * min(1,3,4) = 8 。
+所以最大分数为 12 。
+示例 2：
+
+输入：nums1 = [4,2,3,1,1], nums2 = [7,5,10,9,6], k = 1
+输出：30
+解释：
+选择下标 2 最优：nums1[2] * nums2[2] = 3 * 10 = 30 是最大可能分数。
+
+```
+
+解体思路
+
+> 1. num2 从大到小排序
+> 2. num1维护一个size为k的最小堆
+> 3. 当最小堆size > k时，把堆顶（最小元素）弹出
+> 4. 当最小堆size = k时，计算sum1 * num2的值，此时的sum1是k个元素的最大值的和（这一点有点费解）
+> 5. 更新最大分数，并与最大分数比较
+> 
+代码
+
+```cpp
+class Solution {
+public:
+    long long maxScore(vector<int>& nums1, vector<int>& nums2, int k) {
+           int n = nums1.size();
+            // 将索引按照 nums2 的值从大到小排序
+            vector<int> indices(n);
+            iota(indices.begin(), indices.end(), 0);
+            sort(indices.begin(), indices.end(), [&](int a, int b) {
+                return nums2[a] > nums2[b];
+            });
+
+            // 优先队列（最小堆）
+            priority_queue<int, vector<int>, greater<int>> min_heap;
+            long long sum_nums1 = 0;
+            long long max_score = 0;
+
+            // 遍历排序后的索引
+            for (int i : indices) {
+                int min_value = nums2[i];
+                min_heap.push(nums1[i]);
+                sum_nums1 += nums1[i];
+
+                // 保持堆的大小为 k
+                if (min_heap.size() > k) {
+                    sum_nums1 -= min_heap.top();
+                    min_heap.pop();
+                }
+
+                // 当堆的大小为 k 时，计算分数
+                if (min_heap.size() == k) {
+                    max_score = max(max_score, sum_nums1 * min_value);
+                }
+            }
+
+            return max_score;
+            }
 };
 ```
