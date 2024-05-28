@@ -539,3 +539,77 @@ public:
 };
 
 ```
+
+## 单调栈
+
+### 739. 每日温度
+题目：
+[739](https://leetcode.cn/problems/daily-temperatures/?envType=study-plan-v2&envId=leetcode-75)
+
+```
+给定一个整数数组 temperatures ，表示每天的温度，返回一个数组 answer ，其中 answer[i] 是指对于第 i 天，下一个更高温度出现在几天后。如果气温在这之后都不会升高，请在该位置用 0 来代替。
+
+示例 1:
+
+输入: temperatures = [73,74,75,71,69,72,76,73]
+输出: [1,1,4,2,1,1,0,0]
+示例 2:
+
+输入: temperatures = [30,40,50,60]
+输出: [1,1,1,0]
+示例 3:
+
+输入: temperatures = [30,60,90]
+输出: [1,1,0]
+
+```
+
+解体思路：
+>  单调栈： 维持栈内元素自底向顶部增长时为递减顺序， 一旦元素大于栈顶元素，就将栈破坏掉，一一将栈内元素弹出， 最后更新入新的元素
+> - 遍历每天的温度： 
+>        a. 如果栈不为空， 或者当前温度>栈顶温度： 
+>            - 更新top_idx对应的值， 其等于当前温度的idx - top_idx
+>            - 弹出栈顶元素
+>        b. 否则： 栈内压入当前温度对应的idx
+> 
+pseudo code:
+```
+         for  idx, t  in  enumerate(temperatures):
+             while stk and t > stk.top()
+                  top_idx = stk.top()
+                  ans[top_idx] = idx - top_idx 
+             stk.push(t) // stack is empty or t < stack top, push stack
+```
+
+code:
+```
+class Solution {
+public:
+    vector<int> dailyTemperatures(vector<int>& temperatures) {  
+        //stepbystep: 
+        //step1:  idx: 0  stk is empty,            stk.push: [0]
+        //step2:  idx: 1  74 > 73(stk.top),        ans[0] = 1 - 0 = 1, stk.pop -> empty  stk.push: [1]
+        //step3:  idx: 2  75 > 74(stk.top),        ans[1] = 2 - 1 = 1, stk.pop -> empty  stk.push: [2]
+        //step4:  idx: 3  71 < 75(stk.top),        stk.push(i): [2(75), 3(71)]
+        //step5:  idx: 4  69 < 71(stk.top),        stk.push(i): [2(75), 3(71), 4(69)]
+        //step6:  idx: 5. 72 > 69(stk.top),        ans[4] = 5 - 4 = 1, stk.pop -> [2(75), 3(71)]
+        //                                         ans[3] = 5 - 3 = 2, stk.pop -> [2(75)]
+        //                                         ans[2] = 5 - 2 = 3, stk.pop -> empty. stk.push: [5]
+        //step7:  idx: 6. 76 > 72(stk.top),        ans[5] = 6 - 5 = 1, stk.pop -> empty. stk.push: [6(76]
+        //step8:  idx: 7. 73 < 76(stk.top),        stk.push(7).  stk: [6(76), 7(73)]
+        int n = temperatures.size(); 
+        vector<int> ans(n, 0); 
+        stack<int> stk;
+        int stk_topidx;  
+        for(int i = 0; i < n; ++i) {
+            while(!stk.empty() && temperatures[i] > temperatures[stk.top()]) {
+                stk_topidx = stk.top(); 
+                ans[stk_topidx] = i - stk_topidx; 
+                stk.pop();
+            }
+            stk.emplace(i); 
+        }
+        return ans;
+    }
+};
+```
